@@ -1,0 +1,46 @@
+{
+  "name": "universal-script-tester",
+  "version": "1.0.0",
+  "description": "Universal web platform for testing JavaScript and Python scripts with isolated execution environments",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test": "echo \"No tests specified\" && exit 0",
+    "health": "curl -f http://localhost:3000/health || exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "python", 
+    "script-tester",
+    "code-execution",
+    "web-platform",
+    "isolated-runtime"
+  ],
+  "author": "Anzize Daouda",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tryboy869/UST"
+  },
+  "bugs": {
+    "url": "https://github.com/Tryboy869/UST"
+  },
+  "homepage": "https://github.com/Tryboy869/UST#readme",
+  "os": [
+    "linux",
+    "darwin"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}
