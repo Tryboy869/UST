@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Copier package.json et installer dépendances
 COPY package*.json ./
-RUN npm ci --only=production --no-audit
+RUN npm install --omit=dev --no-audit
 
 # Copier le code de l'application
 COPY app.js ./
