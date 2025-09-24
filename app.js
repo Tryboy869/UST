@@ -538,10 +538,10 @@ class JavaScriptRuntime {
                 // Créer un contexte sécurisé
                 const sandbox = {
                     console: {
-                        log: (...args) => output.push({ type: 'log', content: args.join(' ') }),
-                        error: (...args) => output.push({ type: 'error', content: args.join(' ') }),
-                        info: (...args) => output.push({ type: 'info', content: args.join(' ') }),
-                        warn: (...args) => output.push({ type: 'warn', content: args.join(' ') })
+                        log: (...args) => output.push({ type: 'log', content: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') }),
+                        error: (...args) => output.push({ type: 'error', content: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') }),
+                        info: (...args) => output.push({ type: 'info', content: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') }),
+                        warn: (...args) => output.push({ type: 'warn', content: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') })
                     },
                     setTimeout: (fn, delay) => {
                         if (delay > 1000) delay = 1000; // Max 1s
