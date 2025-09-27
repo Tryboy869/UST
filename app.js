@@ -71,11 +71,21 @@ const frontendHTML = `<!DOCTYPE html>
             <h1 class="text-lg font-bold text-white">Script Tester</h1>
         </div>
         
-        <!-- Language Selector -->
-        <div class="flex-grow flex justify-center min-w-max sm:flex-grow-0">
+        <!-- Language Selector & Theme Selector -->
+        <div class="flex-grow flex justify-center items-center gap-4 min-w-max sm:flex-grow-0">
             <div class="flex items-center bg-slate-700 rounded-lg p-1 text-sm">
                 <button data-lang="javascript" class="lang-btn px-4 py-1 rounded-md transition-colors duration-200">JavaScript</button>
                 <button data-lang="python" class="lang-btn px-4 py-1 rounded-md transition-colors duration-200">Python</button>
+            </div>
+            
+            <div class="flex items-center bg-slate-700 rounded-lg p-1 text-sm">
+                <select id="theme-selector" class="bg-transparent text-slate-300 px-3 py-1 rounded-md border-none outline-none cursor-pointer">
+                    <option value="vs-dark" class="bg-slate-700">VS Dark</option>
+                    <option value="vs-light" class="bg-slate-700">VS Light</option>
+                    <option value="hc-black" class="bg-slate-700">High Contrast</option>
+                    <option value="github-dark" class="bg-slate-700">GitHub Dark</option>
+                    <option value="monokai" class="bg-slate-700">Monokai</option>
+                </select>
             </div>
         </div>
 
@@ -154,6 +164,7 @@ const frontendHTML = `<!DOCTYPE html>
         const importButton = document.getElementById('import-button');
         const exportButton = document.getElementById('export-button');
         const fileInput = document.getElementById('file-input');
+        const themeSelector = document.getElementById('theme-selector');
 
         // App State
         let state = {
@@ -213,6 +224,41 @@ for i in range(1, 4):
         function initMonacoEditor() {
             require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
             require(['vs/editor/editor.main'], () => {
+                // Define custom themes
+                monaco.editor.defineTheme('github-dark', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { token: 'comment', foreground: '6A737D', fontStyle: 'italic' },
+                        { token: 'string', foreground: '9ECBFF' },
+                        { token: 'keyword', foreground: 'FF7B72' },
+                        { token: 'number', foreground: '79C0FF' },
+                        { token: 'function', foreground: 'D2A8FF' }
+                    ],
+                    colors: {
+                        'editor.background': '#0D1117',
+                        'editor.foreground': '#C9D1D9',
+                        'editor.lineHighlightBackground': '#21262D'
+                    }
+                });
+
+                monaco.editor.defineTheme('monokai', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { token: 'comment', foreground: '75715E', fontStyle: 'italic' },
+                        { token: 'string', foreground: 'E6DB74' },
+                        { token: 'keyword', foreground: 'F92672' },
+                        { token: 'number', foreground: 'AE81FF' },
+                        { token: 'function', foreground: 'A6E22E' }
+                    ],
+                    colors: {
+                        'editor.background': '#272822',
+                        'editor.foreground': '#F8F8F2',
+                        'editor.lineHighlightBackground': '#3E3D32'
+                    }
+                });
+
                 editor = monaco.editor.create(editorContainer, {
                     value: defaultCode.javascript,
                     language: 'javascript',
@@ -224,6 +270,9 @@ for i in range(1, 4):
                     padding: { top: 16 },
                     wordWrap: 'on'
                 });
+
+                // Set up theme selector after editor is created
+                setupThemeSelector();
             });
         }
         
@@ -245,6 +294,14 @@ for i in range(1, 4):
             importButton.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', handleFileImport);
             exportButton.addEventListener('click', handleFileExport);
+            themeSelector.addEventListener('change', handleThemeChange);
+        }
+
+        function setupThemeSelector() {
+            // Load saved theme from localStorage if available
+            const savedTheme = localStorage.getItem('editor-theme') || 'vs-dark';
+            themeSelector.value = savedTheme;
+            monaco.editor.setTheme(savedTheme);
         }
 
         // Event Handlers
@@ -261,6 +318,34 @@ for i in range(1, 4):
             editor.setValue(defaultCode[newLang]);
             updateLanguageUI();
             clearConsole();
+        }
+        
+        function handleThemeChange() {
+            const selectedTheme = themeSelector.value;
+            monaco.editor.setTheme(selectedTheme);
+            
+            // Save theme preference to localStorage
+            localStorage.setItem('editor-theme', selectedTheme);
+            
+            // Update interface colors based on theme
+            updateInterfaceForTheme(selectedTheme);
+        }
+
+        function updateInterfaceForTheme(theme) {
+            const body = document.body;
+            const outputPanel = document.getElementById('output-panel');
+            
+            if (theme === 'vs-light') {
+                // Light theme adjustments
+                body.style.background = '#f3f4f6';
+                body.style.color = '#374151';
+                outputPanel.style.backgroundColor = '#f9fafb';
+            } else {
+                // Dark themes (default)
+                body.style.background = '';
+                body.style.color = '';
+                outputPanel.style.backgroundColor = '';
+            }
         }
         
         function handleTabChange(newTab) {
