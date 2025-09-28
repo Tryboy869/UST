@@ -14,10 +14,11 @@ Une plateforme web simple pour tester rapidement des scripts JavaScript et Pytho
 - Console temps réel avec historique
 - Import/Export de fichiers
 - Interface responsive
+- **API REST pour intégration IA/systèmes externes**
 
 ## Limitations
 
-- Scripts légers uniquement (timeout 5 secondes, 10KB max)
+- Scripts légers uniquement (timeout 5/30 secondes selon usage, 10KB/100KB max)
 - Modules Python restreints (pas d'imports système)
 - Sessions temporaires (5 minutes d'inactivité)
 - Hébergement gratuit (performances variables)
