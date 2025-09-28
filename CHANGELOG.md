@@ -2,6 +2,29 @@
 
 Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
+## [1.2.0] - 28-09-2025
+
+### Ajouté
+- **API REST complète** : Endpoints pour intégration externe
+  - `/api/execute` : Exécution standard (10KB, 5s)
+  - `/api/ai/execute` : Exécution pour IA (100KB, 30s)
+  - `/api/environments` : Liste des runtimes disponibles
+  - `/api/status` : Monitoring système
+- **Support IA étendu** : Limites augmentées pour agents IA
+- **Authentification API** : Système d'API keys pour endpoints IA
+- **Documentation API** : Guide complet d'intégration
+
+### Amélioré
+- **Security Gateway** : Support des deux modes (standard/AI)
+- **Runtimes** : Timeouts adaptatifs selon le type d'usage
+- **Orchestrateur** : Méthode dédiée pour exécution IA
+- **Audit logs** : Traçabilité différenciée par type d'usage
+
+### Technique
+- Validation de code adaptée aux limites étendues
+- Architecture modulaire préservée avec nouvelles capacités
+- Format JSON standardisé pour réponses API
+
 ## [1.1.0] - 27-09-2025
 
 ### Ajouté
