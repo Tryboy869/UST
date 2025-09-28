@@ -547,14 +547,22 @@ for i in range(1, 4):
 // MODULE 2: SECURITY GATEWAY MODULE (Critical)
 // =============================================================================
 class SecurityGateway {
-    static validateCode(code, language) {
+    static validateCode(code, language, mode = 'standard') {
         // Validation de base
         if (!code || typeof code !== 'string') {
             throw new Error('Code invalide');
         }
 
-        if (code.length > 10 * 1024) { // 10KB max
-            throw new Error('Code trop volumineux (max 10KB)');
+        // Limites selon le mode
+        const limits = {
+            'standard': { maxSize: 10 * 1024, timeout: 5000 },
+            'ai': { maxSize: 100 * 1024, timeout: 30000 }
+        };
+
+        const currentLimit = limits[mode] || limits['standard'];
+
+        if (code.length > currentLimit.maxSize) {
+            throw new Error(`Code trop volumineux (max ${currentLimit.maxSize / 1024}KB)`);
         }
 
         // Patterns dangereux par langage
@@ -595,7 +603,9 @@ class SecurityGateway {
 
         return {
             safe: true,
-            sanitizedCode: code.trim()
+            sanitizedCode: code.trim(),
+            mode: mode,
+            limits: currentLimit
         };
     }
 
@@ -614,10 +624,18 @@ class SecurityGateway {
 // MODULE 3: JAVASCRIPT RUNTIME MODULE
 // =============================================================================
 class JavaScriptRuntime {
-    static async execute(code) {
+    static async execute(code, mode = 'standard') {
         return new Promise((resolve) => {
             const output = [];
             const startTime = Date.now();
+            
+            // Timeouts selon le mode
+            const timeouts = {
+                'standard': 5000,
+                'ai': 30000
+            };
+            
+            const maxTimeout = timeouts[mode] || timeouts['standard'];
 
             try {
                 // Créer un contexte sécurisé
@@ -629,7 +647,7 @@ class JavaScriptRuntime {
                         warn: (...args) => output.push({ type: 'warn', content: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') })
                     },
                     setTimeout: (fn, delay) => {
-                        if (delay > 1000) delay = 1000; // Max 1s
+                        if (delay > 1000) delay = 1000; // Max 1s même en mode AI
                         return setTimeout(fn, delay);
                     },
                     Math: Math,
@@ -646,11 +664,11 @@ class JavaScriptRuntime {
 
                 // Timeout de sécurité
                 const timeout = setTimeout(() => {
-                    throw new Error('Timeout: exécution trop longue (>5s)');
-                }, 5000);
+                    throw new Error(`Timeout: exécution trop longue (>${maxTimeout/1000}s)`);
+                }, maxTimeout);
 
                 vm.runInContext(code, context, {
-                    timeout: 5000,
+                    timeout: maxTimeout,
                     displayErrors: false
                 });
 
@@ -661,7 +679,8 @@ class JavaScriptRuntime {
                 resolve({
                     success: true,
                     output: output,
-                    executionTime: executionTime
+                    executionTime: executionTime,
+                    mode: mode
                 });
 
             } catch (error) {
@@ -670,7 +689,8 @@ class JavaScriptRuntime {
                     success: false,
                     error: error.message,
                     output: output,
-                    executionTime: executionTime
+                    executionTime: executionTime,
+                    mode: mode
                 });
             }
         });
@@ -681,15 +701,23 @@ class JavaScriptRuntime {
 // MODULE 4: PYTHON RUNTIME MODULE
 // =============================================================================
 class PythonRuntime {
-    static async execute(code) {
+    static async execute(code, mode = 'standard') {
         return new Promise((resolve) => {
             const startTime = Date.now();
             let output = '';
             let hasError = false;
+            
+            // Timeouts selon le mode
+            const timeouts = {
+                'standard': 5000,
+                'ai': 30000
+            };
+            
+            const maxTimeout = timeouts[mode] || timeouts['standard'];
 
             // Créer un processus Python isolé
             const pythonProcess = spawn('python3', ['-c', code], {
-                timeout: 5000,
+                timeout: maxTimeout,
                 env: {
                     PATH: '/usr/bin:/bin',
                     PYTHONPATH: ''
@@ -719,7 +747,8 @@ class PythonRuntime {
                         content: output.trim() || 'Aucune sortie'
                     }],
                     executionTime: executionTime,
-                    exitCode: code
+                    exitCode: code,
+                    mode: mode
                 });
             });
 
@@ -730,7 +759,8 @@ class PythonRuntime {
                     success: false,
                     error: `Erreur d'exécution: ${error.message}`,
                     output: [],
-                    executionTime: executionTime
+                    executionTime: executionTime,
+                    mode: mode
                 });
             });
 
@@ -740,12 +770,13 @@ class PythonRuntime {
                     pythonProcess.kill('SIGKILL');
                     resolve({
                         success: false,
-                        error: 'Timeout: exécution interrompue (>5s)',
+                        error: `Timeout: exécution interrompue (>${maxTimeout/1000}s)`,
                         output: [],
-                        executionTime: 5000
+                        executionTime: maxTimeout,
+                        mode: mode
                     });
                 }
-            }, 5000);
+            }, maxTimeout);
         });
     }
 }
@@ -809,18 +840,18 @@ class Orchestrator {
     }
 
     async executeCode(sessionId, language, code) {
-        // Étape 1: Validation sécurité
+        // Étape 1: Validation sécurité (limites standard)
         const auditData = { language, code };
         let result;
 
         try {
-            const validation = SecurityGateway.validateCode(code, language);
+            const validation = SecurityGateway.validateCode(code, language, 'standard');
             
             // Étape 2: Exécution selon le runtime approprié
             if (language === 'javascript') {
-                result = await JavaScriptRuntime.execute(validation.sanitizedCode);
+                result = await JavaScriptRuntime.execute(validation.sanitizedCode, 'standard');
             } else if (language === 'python') {
-                result = await PythonRuntime.execute(validation.sanitizedCode);
+                result = await PythonRuntime.execute(validation.sanitizedCode, 'standard');
             } else {
                 throw new Error(`Langage non supporté: ${language}`);
             }
@@ -844,6 +875,47 @@ class Orchestrator {
         } catch (error) {
             result = { success: false, error: error.message };
             SecurityGateway.auditLog('EXECUTE_CODE', auditData, result);
+            return result;
+        }
+    }
+
+    async executeCodeAI(sessionId, language, code) {
+        // Étape 1: Validation sécurité (limites étendues pour IA)
+        const auditData = { language, code, type: 'AI' };
+        let result;
+
+        try {
+            const validation = SecurityGateway.validateCode(code, language, 'ai');
+            
+            // Étape 2: Exécution selon le runtime approprié avec limites AI
+            if (language === 'javascript') {
+                result = await JavaScriptRuntime.execute(validation.sanitizedCode, 'ai');
+            } else if (language === 'python') {
+                result = await PythonRuntime.execute(validation.sanitizedCode, 'ai');
+            } else {
+                throw new Error(`Langage non supporté: ${language}`);
+            }
+
+            // Étape 3: Enregistrement en base
+            this.sessionDB.addExecution(sessionId, {
+                language,
+                code: validation.sanitizedCode,
+                result,
+                type: 'AI',
+                timestamp: new Date().toISOString()
+            });
+
+            // Étape 4: Audit log
+            SecurityGateway.auditLog('EXECUTE_CODE_AI', auditData, result);
+
+            return {
+                success: true,
+                ...result
+            };
+
+        } catch (error) {
+            result = { success: false, error: error.message };
+            SecurityGateway.auditLog('EXECUTE_CODE_AI', auditData, result);
             return result;
         }
     }
@@ -889,6 +961,91 @@ app.post('/api/execute', async (req, res) => {
             error: 'Erreur interne du serveur'
         });
     }
+});
+
+// Route API - Exécution pour IA (limites étendues)
+app.post('/api/ai/execute', async (req, res) => {
+    try {
+        const { language, code, session_id, api_key } = req.body;
+        
+        // Validation API key (basique)
+        if (!api_key || api_key !== process.env.AI_API_KEY) {
+            return res.status(401).json({
+                success: false,
+                error: 'API key invalide'
+            });
+        }
+
+        // Validation des paramètres
+        if (!language || !code || !session_id) {
+            return res.status(400).json({
+                success: false,
+                error: 'Paramètres manquants (language, code, session_id)'
+            });
+        }
+
+        // Créer session AI avec limites étendues
+        if (!orchestrator.sessionDB.getSession(session_id)) {
+            orchestrator.sessionDB.createSession(session_id);
+        }
+
+        // Exécuter avec limites AI étendues
+        const result = await orchestrator.executeCodeAI(session_id, language, code);
+        
+        res.json({
+            success: result.success,
+            output: result.output || [],
+            execution_time: result.executionTime || 0,
+            error: result.error || null,
+            metadata: {
+                language: language,
+                session_id: session_id,
+                timestamp: new Date().toISOString()
+            }
+        });
+
+    } catch (error) {
+        console.error('Erreur API AI:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erreur interne du serveur'
+        });
+    }
+});
+
+// Route API - Liste des environnements disponibles
+app.get('/api/environments', (req, res) => {
+    res.json({
+        success: true,
+        environments: [
+            {
+                language: 'javascript',
+                runtime: 'Node.js VM isolé',
+                timeout: '5 secondes (standard) / 30 secondes (AI)',
+                memory_limit: '10KB (standard) / 100KB (AI)',
+                features: ['console.log', 'Math', 'JSON', 'Date', 'Array', 'Object']
+            },
+            {
+                language: 'python',
+                runtime: 'Python 3 subprocess',
+                timeout: '5 secondes (standard) / 30 secondes (AI)',
+                memory_limit: '10KB (standard) / 100KB (AI)',
+                features: ['print', 'math', 'random', 'time', 'json']
+            }
+        ]
+    });
+});
+
+// Route API - Statut du système
+app.get('/api/status', (req, res) => {
+    res.json({
+        success: true,
+        status: 'operational',
+        version: '1.2.0',
+        uptime: process.uptime(),
+        memory_usage: process.memoryUsage(),
+        active_sessions: orchestrator.sessionDB.sessions.size
+    });
 });
 
 // Route API - Historique de session
