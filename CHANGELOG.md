@@ -7,12 +7,13 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 ### Ajouté
 - **API REST complète** : Endpoints pour intégration externe
   - `/api/execute` : Exécution standard (10KB, 5s)
-  - `/api/ai/execute` : Exécution pour IA (100KB, 30s)
+  - `/api/ai/execute` : Exécution pour IA (100KB, 30s) avec API key (`ust-api-key`)
   - `/api/environments` : Liste des runtimes disponibles
   - `/api/status` : Monitoring système
 - **Support IA étendu** : Limites augmentées pour agents IA
-- **Authentification API** : Système d'API keys pour endpoints IA
+- **Authentification API** : Système d'API key pour endpoints IA
 - **Documentation API** : Guide complet d'intégration
+- **Exemples d'intégration** : Script Groq + UST dans `/examples/`
 
 ### Amélioré
 - **Security Gateway** : Support des deux modes (standard/AI)
@@ -24,6 +25,7 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 - Validation de code adaptée aux limites étendues
 - Architecture modulaire préservée avec nouvelles capacités
 - Format JSON standardisé pour réponses API
+- Proof of concept validé avec Groq (100% success rate)
 
 ## [1.1.0] - 27-09-2025
 
