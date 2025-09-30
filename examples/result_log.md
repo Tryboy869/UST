@@ -1,5 +1,4 @@
- Collecting groq
-  Downloading groq-0.32.0-py3-none-any.whl.metadata (16 kB)
+Requirement already satisfied: groq in /usr/local/lib/python3.12/dist-packages (0.32.0)
 Requirement already satisfied: requests in /usr/local/lib/python3.12/dist-packages (2.32.4)
 Requirement already satisfied: anyio<5,>=3.5.0 in /usr/local/lib/python3.12/dist-packages (from groq) (4.10.0)
 Requirement already satisfied: distro<2,>=1.7.0 in /usr/local/lib/python3.12/dist-packages (from groq) (1.9.0)
@@ -16,10 +15,6 @@ Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.12/dist-packa
 Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (0.7.0)
 Requirement already satisfied: pydantic-core==2.33.2 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (2.33.2)
 Requirement already satisfied: typing-inspection>=0.4.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (0.4.1)
-Downloading groq-0.32.0-py3-none-any.whl (135 kB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 135.4/135.4 kB 2.2 MB/s eta 0:00:00
-Installing collected packages: groq
-Successfully installed groq-0.32.0
 
     ╔═══════════════════════════════════════════════════════════════╗
     ║   Universal Script Tester - Test d'Intégration Groq AI       ║
@@ -43,11 +38,18 @@ TÂCHE: Calcule la factorielle de 10 et affiche le résultat
 
 [1/3] Génération du code avec Groq AI...
 
-✓ Code généré (322 caractères)
+✓ Code généré (171 caractères)
 
 Code:
 ----------------------------------------------------------------------
-# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+def factorielle(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorielle(n-1)
+
+resultat = factorielle(10)
+print("La factorielle de 10 est :", resultat)
 ----------------------------------------------------------------------
 
 [2/3] Exécution via Universal Script Tester API...
@@ -55,10 +57,10 @@ Code:
 [3/3] Résultats de l'exécution:
 ----------------------------------------------------------------------
 ✓ EXÉCUTION RÉUSSIE
-Temps d'exécution: 183ms
+Temps d'exécution: 45ms
 
 Sortie du programme:
-  [log] Aucune sortie
+  [log] La factorielle de 10 est : 3628800
 ======================================================================
 
 
@@ -71,19 +73,30 @@ TÂCHE: Crée une fonction qui génère les 15 premiers nombres de Fibonacci
 
 [1/3] Génération du code avec Groq AI...
 
-✓ Code généré (322 caractères)
+✓ Code généré (268 caractères)
 
 Code:
 ----------------------------------------------------------------------
-# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+function generateFibonacci(n) {
+    let fibSequence = [0, 1];
+    while (fibSequence.length < n) {
+        fibSequence.push(fibSequence[fibSequence.length - 1] + fibSequence[fibSequence.length - 2]);
+    }
+    return fibSequence;
+}
+
+console.log(generateFibonacci(15));
 ----------------------------------------------------------------------
 
 [2/3] Exécution via Universal Script Tester API...
 
 [3/3] Résultats de l'exécution:
 ----------------------------------------------------------------------
-✗ ÉCHEC DE L'EXÉCUTION
-Erreur: Invalid or unexpected token
+✓ EXÉCUTION RÉUSSIE
+Temps d'exécution: 1ms
+
+Sortie du programme:
+  [log] [0,1,1,2,3,5,8,13,21,34,55,89,144,233,377]
 ======================================================================
 
 
@@ -96,11 +109,21 @@ TÂCHE: Écris un algorithme de tri à bulles pour trier [64, 34, 25, 12, 22, 11
 
 [1/3] Génération du code avec Groq AI...
 
-✓ Code généré (322 caractères)
+✓ Code généré (371 caractères)
 
 Code:
 ----------------------------------------------------------------------
-# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+def tri_a_bulles(tableau):
+    n = len(tableau)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if tableau[j] > tableau[j + 1]:
+                tableau[j], tableau[j + 1] = tableau[j + 1], tableau[j]
+    return tableau
+
+tableau = [64, 34, 25, 12, 22, 11, 90]
+print("Tableau avant tri:", tableau)
+print("Tableau après tri:", tri_a_bulles(tableau))
 ----------------------------------------------------------------------
 
 [2/3] Exécution via Universal Script Tester API...
@@ -108,10 +131,11 @@ Code:
 [3/3] Résultats de l'exécution:
 ----------------------------------------------------------------------
 ✓ EXÉCUTION RÉUSSIE
-Temps d'exécution: 103ms
+Temps d'exécution: 21ms
 
 Sortie du programme:
-  [log] Aucune sortie
+  [log] Tableau avant tri: [64, 34, 25, 12, 22, 11, 90]
+Tableau après tri: [11, 12, 22, 25, 34, 64, 90]
 ======================================================================
 
 
@@ -124,19 +148,28 @@ TÂCHE: Calcule la somme des nombres pairs de 1 à 100
 
 [1/3] Génération du code avec Groq AI...
 
-✓ Code généré (322 caractères)
+✓ Code généré (110 caractères)
 
 Code:
 ----------------------------------------------------------------------
-# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+let somme = 0;
+for (let i = 1; i <= 100; i++) {
+  if (i % 2 === 0) {
+    somme += i;
+  }
+}
+console.log(somme);
 ----------------------------------------------------------------------
 
 [2/3] Exécution via Universal Script Tester API...
 
 [3/3] Résultats de l'exécution:
 ----------------------------------------------------------------------
-✗ ÉCHEC DE L'EXÉCUTION
-Erreur: Invalid or unexpected token
+✓ EXÉCUTION RÉUSSIE
+Temps d'exécution: 1ms
+
+Sortie du programme:
+  [log] 2550
 ======================================================================
 
 
@@ -144,11 +177,11 @@ Erreur: Invalid or unexpected token
 RÉSUMÉ DES TESTS
 ======================================================================
 
-Tests réussis: 2/4
+Tests réussis: 4/4
 ✓ Test 1: Calcule la factorielle de 10 et affiche le résulta...
-✗ Test 2: Crée une fonction qui génère les 15 premiers nombr...
+✓ Test 2: Crée une fonction qui génère les 15 premiers nombr...
 ✓ Test 3: Écris un algorithme de tri à bulles pour trier [64...
-✗ Test 4: Calcule la somme des nombres pairs de 1 à 100...
+✓ Test 4: Calcule la somme des nombres pairs de 1 à 100...
 
 
 ✓ Tests terminés !
