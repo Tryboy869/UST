@@ -1,98 +1,158 @@
-"""
-Universal Script Tester API - Test d'intégration Groq
-Exemple d'utilisation pour démonstration
-"""
+ Collecting groq
+  Downloading groq-0.32.0-py3-none-any.whl.metadata (16 kB)
+Requirement already satisfied: requests in /usr/local/lib/python3.12/dist-packages (2.32.4)
+Requirement already satisfied: anyio<5,>=3.5.0 in /usr/local/lib/python3.12/dist-packages (from groq) (4.10.0)
+Requirement already satisfied: distro<2,>=1.7.0 in /usr/local/lib/python3.12/dist-packages (from groq) (1.9.0)
+Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.12/dist-packages (from groq) (0.28.1)
+Requirement already satisfied: pydantic<3,>=1.9.0 in /usr/local/lib/python3.12/dist-packages (from groq) (2.11.9)
+Requirement already satisfied: sniffio in /usr/local/lib/python3.12/dist-packages (from groq) (1.3.1)
+Requirement already satisfied: typing-extensions<5,>=4.10 in /usr/local/lib/python3.12/dist-packages (from groq) (4.15.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.12/dist-packages (from requests) (3.4.3)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.12/dist-packages (from requests) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.12/dist-packages (from requests) (2.5.0)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.12/dist-packages (from requests) (2025.8.3)
+Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.12/dist-packages (from httpx<1,>=0.23.0->groq) (1.0.9)
+Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.12/dist-packages (from httpcore==1.*->httpx<1,>=0.23.0->groq) (0.16.0)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (0.7.0)
+Requirement already satisfied: pydantic-core==2.33.2 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (2.33.2)
+Requirement already satisfied: typing-inspection>=0.4.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3,>=1.9.0->groq) (0.4.1)
+Downloading groq-0.32.0-py3-none-any.whl (135 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 135.4/135.4 kB 2.2 MB/s eta 0:00:00
+Installing collected packages: groq
+Successfully installed groq-0.32.0
 
-import json
-import requests
-from groq import Groq
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║   Universal Script Tester - Test d'Intégration Groq AI       ║
+    ║                                                               ║
+    ║   Ce notebook démontre l'intégration d'une IA (Groq) avec    ║
+    ║   l'API Universal Script Tester pour générer et exécuter     ║
+    ║   du code automatiquement.                                    ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    
 
-# Configuration
-GROQ_API_KEY = "votre_clé_groq"
-UST_API_KEY = "ust-api-key"
-UST_API_URL = "https://ust-7isa.onrender.com/api/ai/execute"
+Lancement des tests de démonstration...
 
-groq_client = Groq(api_key=GROQ_API_KEY)
 
-def ask_groq_to_write_code(task_description, language="python"):
-    """Génère du code via Groq"""
-    system_prompt = f"""Tu es un assistant de programmation expert. 
-Génère du code {language} propre et fonctionnel pour la tâche demandée.
-IMPORTANT: Réponds UNIQUEMENT avec le code, sans explications ni markdown."""
 
-    completion = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": task_description}
-        ],
-        temperature=0.3,
-        max_tokens=2000
-    )
-    
-    code = completion.choices[0].message.content
-    
-    # Nettoyer le markdown si présent
-    if "```" in code:
-        code = code.split("```")[1]
-        if code.startswith("python") or code.startswith("javascript"):
-            code = "\n".join(code.split("\n")[1:])
-    
-    return code.strip()
+======================================================================
+TEST 1/4
+======================================================================
+======================================================================
+TÂCHE: Calcule la factorielle de 10 et affiche le résultat
+======================================================================
 
-def execute_code_ust(language, code, session_id="demo-session"):
-    """Exécute du code via UST API"""
-    payload = {
-        "language": language,
-        "code": code,
-        "session_id": session_id,
-        "api_key": UST_API_KEY
-    }
-    
-    response = requests.post(
-        UST_API_URL,
-        json=payload,
-        headers={"Content-Type": "application/json"},
-        timeout=35
-    )
-    
-    return response.json()
+[1/3] Génération du code avec Groq AI...
 
-def run_demo():
-    """Exécute une démonstration complète"""
-    task = "Calcule la factorielle de 10 et affiche le résultat"
-    
-    print(f"Tâche: {task}\n")
-    
-    # Étape 1: Groq génère
-    print("[1/2] Génération du code avec Groq...")
-    code = ask_groq_to_write_code(task, "python")
-    print(f"Code généré:\n{code}\n")
-    
-    # Étape 2: UST exécute
-    print("[2/2] Exécution via UST API...")
-    result = execute_code_ust("python", code)
-    
-    # Résultats
-    print("\nRésultats:")
-    print(f"Succès: {result['success']}")
-    print(f"Temps: {result['execution_time']}ms")
-    
-    if result['success']:
-        for output in result['output']:
-            print(f"Output: {output['content']}")
-    
-    return {
-        "task": task,
-        "generated_code": code,
-        "execution_result": result
-    }
+✓ Code généré (322 caractères)
 
-if __name__ == "__main__":
-    demo_result = run_demo()
-    
-    # Sauvegarder les résultats
-    with open('result.json', 'w') as f:
-        json.dump(demo_result, f, indent=2)
-    
-    print("\n✓ Résultats sauvegardés dans result.json")
+Code:
+----------------------------------------------------------------------
+# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+----------------------------------------------------------------------
+
+[2/3] Exécution via Universal Script Tester API...
+
+[3/3] Résultats de l'exécution:
+----------------------------------------------------------------------
+✓ EXÉCUTION RÉUSSIE
+Temps d'exécution: 183ms
+
+Sortie du programme:
+  [log] Aucune sortie
+======================================================================
+
+
+======================================================================
+TEST 2/4
+======================================================================
+======================================================================
+TÂCHE: Crée une fonction qui génère les 15 premiers nombres de Fibonacci
+======================================================================
+
+[1/3] Génération du code avec Groq AI...
+
+✓ Code généré (322 caractères)
+
+Code:
+----------------------------------------------------------------------
+# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+----------------------------------------------------------------------
+
+[2/3] Exécution via Universal Script Tester API...
+
+[3/3] Résultats de l'exécution:
+----------------------------------------------------------------------
+✗ ÉCHEC DE L'EXÉCUTION
+Erreur: Invalid or unexpected token
+======================================================================
+
+
+======================================================================
+TEST 3/4
+======================================================================
+======================================================================
+TÂCHE: Écris un algorithme de tri à bulles pour trier [64, 34, 25, 12, 22, 11, 90]
+======================================================================
+
+[1/3] Génération du code avec Groq AI...
+
+✓ Code généré (322 caractères)
+
+Code:
+----------------------------------------------------------------------
+# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+----------------------------------------------------------------------
+
+[2/3] Exécution via Universal Script Tester API...
+
+[3/3] Résultats de l'exécution:
+----------------------------------------------------------------------
+✓ EXÉCUTION RÉUSSIE
+Temps d'exécution: 103ms
+
+Sortie du programme:
+  [log] Aucune sortie
+======================================================================
+
+
+======================================================================
+TEST 4/4
+======================================================================
+======================================================================
+TÂCHE: Calcule la somme des nombres pairs de 1 à 100
+======================================================================
+
+[1/3] Génération du code avec Groq AI...
+
+✓ Code généré (322 caractères)
+
+Code:
+----------------------------------------------------------------------
+# Erreur Groq: Error code: 400 - {'error': {'message': 'The model `llama-3.1-70b-versatile` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+----------------------------------------------------------------------
+
+[2/3] Exécution via Universal Script Tester API...
+
+[3/3] Résultats de l'exécution:
+----------------------------------------------------------------------
+✗ ÉCHEC DE L'EXÉCUTION
+Erreur: Invalid or unexpected token
+======================================================================
+
+
+======================================================================
+RÉSUMÉ DES TESTS
+======================================================================
+
+Tests réussis: 2/4
+✓ Test 1: Calcule la factorielle de 10 et affiche le résulta...
+✗ Test 2: Crée une fonction qui génère les 15 premiers nombr...
+✓ Test 3: Écris un algorithme de tri à bulles pour trier [64...
+✗ Test 4: Calcule la somme des nombres pairs de 1 à 100...
+
+
+✓ Tests terminés !
+
+Vous pouvez maintenant tester avec vos propres tâches:
+  custom_test('Votre tâche ici', 'python')
+'\nEXEMPLES D\'UTILISATION:\n\n1. Test simple:\n   result = custom_test("Calcule le 20ème nombre premier", "python")\n\n2. Test JavaScript:\n   result = custom_test("Crée une fonction qui inverse une chaîne de caractères", "javascript")\n\n3. Test complexe:\n   result = custom_test(\n       "Implémente l\'algorithme de recherche binaire et teste-le sur [1,3,5,7,9,11,13,15]",\n       "python"\n   )\n\n4. Accès direct aux résultats:\n   result = custom_test("Calcule la somme de 1 à 1000", "python")\n   print(result["generated_code"])\n   print(result["execution_result"]["output"])\n'
